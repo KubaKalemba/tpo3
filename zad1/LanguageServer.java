@@ -8,7 +8,7 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
-public class LanguageServer {
+public class LanguageServer implements Runnable{
 
     private String languageCode;
     private Map<String, String> dictionary;
@@ -21,15 +21,24 @@ public class LanguageServer {
         // Initialize dictionary with translations
     }
 
-    public void run() throws IOException, ClassNotFoundException {
-        ServerSocket serverSocket = new ServerSocket(PORT);
-        System.out.println("Starting language server on port " + PORT + "...");
+    public void run() {
+        ServerSocket serverSocket = null;
+        try {
+            serverSocket = new ServerSocket(PORT);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        System.out.println("[lang]: Starting language server on port " + PORT + "...");
 
         while (true) {
-            Socket clientSocket = serverSocket.accept();
-            System.out.println("New client connected");
+            Socket clientSocket = null;
+            try {
+                clientSocket = serverSocket.accept();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            System.out.println("[lang]: New client connected");
 
-            //read word from client
             ObjectInputStream in;
             ObjectOutputStream out;
             try {
@@ -40,33 +49,31 @@ public class LanguageServer {
                 return;
             }
 
-            Request request = (Request) in.readObject();
+            Request request = null;
+            try {
+                request = (Request) in.readObject();
+            } catch (IOException | ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            }
             String wordToTranslate = request.getWordToTranslate();
             String targetLanguageCode = request.getTargetLanguageCode();
-            System.out.println("WORD: " +wordToTranslate);
-            System.out.println("LANG: " + targetLanguageCode);
+            System.out.println("[lang]: WORD: " + wordToTranslate);
+            System.out.println("[lang]: LANG: " + targetLanguageCode);
+
             //translate word
+            String translation = getTranslation(wordToTranslate);
 
             //write translation to the stream
-
-
-            // Handle client request
-            //RequestHandler requestHandler = new RequestHandler(clientSocket);
-            //requestHandler.handleRequest();
+            try {
+                out.writeObject("oj");
+                out.flush();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 
-    public void sendRequest(String wordToTranslate, Socket clientSocket) {
-        try {
-            // Send request to client
-            ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
-            out.writeObject(wordToTranslate);
-            out.flush();
-        } catch (IOException e) {
-            System.out.println("Error sending request");
-        }
-    }
-
+    //TODO
     public String getTranslation(String wordToTranslate) {
         // Get translation from dictionary
         return dictionary.get(wordToTranslate);

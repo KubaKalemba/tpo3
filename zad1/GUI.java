@@ -2,25 +2,28 @@ package zad1;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 public class GUI {
-    private JFrame frame;
-    private JTextField wordField;
-    private JTextField languageCodeField;
-    private JButton translateButton;
+    private final JFrame frame;
+    private final JTextField wordField;
+    private final JTextField languageCodeField;
 
     public GUI() {
         frame = new JFrame("Kuba's Translator");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.setSize(500,500);
-        wordField = new JTextField();
-        languageCodeField = new JTextField();
-        translateButton = new JButton("Translate");
+        frame.setSize(500, 200);
+
+        // Create labels
+        JLabel wordLabel = new JLabel("Word to Translate:");
+        JLabel languageCodeLabel = new JLabel("Target Language Code:");
+
+        wordField = new JTextField(20); // Set preferred width
+        languageCodeField = new JTextField(20); // Set preferred width
+        JButton translateButton = new JButton("Translate");
 
         translateButton.addActionListener(e -> {
             String wordToTranslate = wordField.getText();
@@ -44,10 +47,16 @@ public class GUI {
             }
         });
 
-        frame.getContentPane().add(wordField, BorderLayout.NORTH);
-        frame.getContentPane().add(languageCodeField, BorderLayout.CENTER);
-        frame.getContentPane().add(translateButton, BorderLayout.SOUTH);
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
+        panel.add(wordLabel);
+        panel.add(wordField);
+        panel.add(languageCodeLabel);
+        panel.add(languageCodeField);
+        panel.add(translateButton);
+
+        frame.getContentPane().add(panel);
         frame.setVisible(true);
     }
 }
