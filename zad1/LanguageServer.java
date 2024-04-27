@@ -8,29 +8,32 @@ import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
 
-public class LanguageServer implements Runnable{
+public class LanguageServer implements Runnable {
 
-    private String languageCode;
+    private final String languageCode;
     private Map<String, String> dictionary;
-    private int PORT;
+    private final int PORT;
 
     public LanguageServer(String languageCode, int port) {
+        System.out.println("Creating lang server on port " + port + "...");
         this.languageCode = languageCode;
         this.dictionary = new HashMap<>();
         this.PORT = port;
-        // Initialize dictionary with translations
+        initDictionary(languageCode);
     }
 
     public void run() {
+        System.out.println("[lang]: Starting language server on port " + PORT + "...");
         ServerSocket serverSocket = null;
         try {
             serverSocket = new ServerSocket(PORT);
+            System.out.println("[lang]: Started!");
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        System.out.println("[lang]: Starting language server on port " + PORT + "...");
 
         while (true) {
+
             Socket clientSocket = null;
             try {
                 clientSocket = serverSocket.accept();
@@ -55,17 +58,16 @@ public class LanguageServer implements Runnable{
             } catch (IOException | ClassNotFoundException e) {
                 throw new RuntimeException(e);
             }
+
             String wordToTranslate = request.getWordToTranslate();
             String targetLanguageCode = request.getTargetLanguageCode();
             System.out.println("[lang]: WORD: " + wordToTranslate);
             System.out.println("[lang]: LANG: " + targetLanguageCode);
 
-            //translate word
             String translation = getTranslation(wordToTranslate);
 
-            //write translation to the stream
             try {
-                out.writeObject("oj");
+                out.writeObject(translation);
                 out.flush();
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -73,10 +75,19 @@ public class LanguageServer implements Runnable{
         }
     }
 
-    //TODO
+    private void initDictionary(String languageCode) {
+        Dictionaries.init();
+        if(Dictionaries.dictionaries.containsKey(languageCode))
+            dictionary = Dictionaries.dictionaries.get(languageCode);
+        else
+            dictionary = new HashMap<>();
+    }
+
     public String getTranslation(String wordToTranslate) {
-        // Get translation from dictionary
-        return dictionary.get(wordToTranslate);
+        if(dictionary.containsKey(wordToTranslate)) {
+            return dictionary.get(wordToTranslate);
+        }
+        return "Nie ma takiego słowa w słowniku :(";
     }
 
     public String getLanguageCode() {

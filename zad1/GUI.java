@@ -17,34 +17,18 @@ public class GUI {
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(500, 200);
 
-        // Create labels
         JLabel wordLabel = new JLabel("Word to Translate:");
         JLabel languageCodeLabel = new JLabel("Target Language Code:");
-
-        wordField = new JTextField(20); // Set preferred width
-        languageCodeField = new JTextField(20); // Set preferred width
+        wordField = new JTextField(20);
+        languageCodeField = new JTextField(20);
         JButton translateButton = new JButton("Translate");
 
         translateButton.addActionListener(e -> {
             String wordToTranslate = wordField.getText();
             String targetLanguageCode = languageCodeField.getText();
+            String translation = new Client(8080).translate(wordToTranslate, targetLanguageCode);
+            JOptionPane.showMessageDialog(frame, translation);
 
-            //sending request to the main server
-            try (Socket socket = new Socket("localhost", 8080);
-                 ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
-                 ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
-
-                Request request = new Request(wordToTranslate, targetLanguageCode);
-                out.writeObject(request);
-                out.flush();
-
-                String translation = (String) in.readObject();
-
-                JOptionPane.showMessageDialog(frame, translation);
-
-            } catch (IOException | ClassNotFoundException ex) {
-                throw new RuntimeException(ex);
-            }
         });
 
         JPanel panel = new JPanel();

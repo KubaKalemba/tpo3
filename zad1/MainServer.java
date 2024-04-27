@@ -6,7 +6,9 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MainServer {
 
@@ -14,9 +16,7 @@ public class MainServer {
     protected static final List<LanguageServer> languageServers = new ArrayList<>();
     private static int currPort = 8081;
     private static Socket clientSocket;
-
-    private ObjectInputStream clientIn;
-    private ObjectOutputStream clientOut;
+    private static final Map<LanguageServer, Thread> threadMap = new HashMap<>();
 
     public static void main(String[] args) throws IOException {
         ServerSocket serverSocket = new ServerSocket(PORT);
@@ -39,8 +39,6 @@ public class MainServer {
                 System.out.println("Error creating input/output streams");
                 return;
             }
-
-            // Handle client request
             handleRequest(in,out);
         }
     }
@@ -48,22 +46,21 @@ public class MainServer {
     public static void handleRequest(ObjectInputStream clientIn, ObjectOutputStream clientOut) {
         try {
             Request request = (Request) clientIn.readObject();
-            String wordToTranslate = request.getWordToTranslate();
-            String targetLanguageCode = request.getTargetLanguageCode();
-            System.out.println("[main]: WORD: " + wordToTranslate);
-            System.out.println("[main]: LANG: " + targetLanguageCode);
+            System.out.println("[main]: WORD: " + request.getWordToTranslate());
+            System.out.println("[main]: LANG: " + request.getTargetLanguageCode());
 
-            // Find the corresponding language server
-            LanguageServer languageServer = findLanguageServer(targetLanguageCode);
-            System.out.println(languageServer.getLanguageCode());
+            LanguageServer languageServer = findLanguageServer(request.getTargetLanguageCode());
+            if(!threadMap.containsKey(languageServer)) {
+                Thread langServerThread = new Thread(languageServer);
+                langServerThread.start();
+                threadMap.put(languageServer, langServerThread);
+            } else if(!threadMap.get(languageServer).isAlive()) {
+                Thread langServerThread = new Thread(languageServer);
+                langServerThread.start();
+            }
 
-            //language server opens and listens on its port
-            //languageServer.run();
-            Thread langServerThread = new Thread(languageServer);
-            langServerThread.start();
-
-            //request is send to the language server
             String translation;
+            System.out.println("Main server connecting to lang server on port " + languageServer.getPORT() + "...");
             try (Socket socket = new Socket("localhost", languageServer.getPORT());
                  ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
                  ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
@@ -73,19 +70,9 @@ public class MainServer {
 
                 translation = (String) in.readObject();
 
-                //JOptionPane.showMessageDialog(frame, translation);
-
             } catch (IOException | ClassNotFoundException ex) {
                 throw new RuntimeException(ex);
             }
-            //language server returns the translation
-
-            //translation is passed back to client GUI
-
-            // Send request to language server
-
-
-            // Send response to client
             clientOut.writeObject(translation);
             clientOut.flush();
         } catch (IOException e) {
@@ -115,6 +102,7 @@ public class MainServer {
         currPort++;
     }
 
+
     public static LanguageServer findLanguageServer(String languageCode) {
         for(LanguageServer languageServer : languageServers) {
             if(languageServer.getLanguageCode().equals(languageCode)) {
@@ -127,6 +115,4 @@ public class MainServer {
         MainServer.addServer(languageServer);
         return languageServer;
     }
-
-
 }
