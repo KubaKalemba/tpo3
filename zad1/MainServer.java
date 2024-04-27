@@ -36,7 +36,7 @@ public class MainServer {
                 in = new ObjectInputStream(clientSocket.getInputStream());
                 out = new ObjectOutputStream(clientSocket.getOutputStream());
             } catch (IOException e) {
-                System.out.println("Error creating input/output streams");
+                System.out.println("Error creating streams!");
                 return;
             }
             handleRequest(in,out);
@@ -76,7 +76,7 @@ public class MainServer {
             clientOut.writeObject(translation);
             clientOut.flush();
         } catch (IOException e) {
-            System.out.println("Error handling request");
+            System.out.println("Error! " + e);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         } finally {
@@ -85,7 +85,7 @@ public class MainServer {
                 clientOut.close();
                 clientSocket.close();
             } catch (IOException e) {
-                System.out.println("Error closing streams");
+                System.out.println("Error! " + e);
             }
         }
     }

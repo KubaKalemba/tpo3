@@ -1,11 +1,6 @@
 package zad1;
 
 import javax.swing.*;
-import java.awt.*;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.Socket;
 
 public class GUI {
     private final JFrame frame;
@@ -21,7 +16,7 @@ public class GUI {
         JLabel languageCodeLabel = new JLabel("Target Language Code:");
         wordField = new JTextField(20);
         languageCodeField = new JTextField(20);
-        JButton translateButton = new JButton("Translate");
+        JButton translateButton = new JButton("Translate!");
 
         translateButton.addActionListener(e -> {
             String wordToTranslate = wordField.getText();

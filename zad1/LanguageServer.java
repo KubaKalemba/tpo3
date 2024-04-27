@@ -48,7 +48,7 @@ public class LanguageServer implements Runnable {
                 in = new ObjectInputStream(clientSocket.getInputStream());
                 out = new ObjectOutputStream(clientSocket.getOutputStream());
             } catch (IOException e) {
-                System.out.println("Error creating input/output streams");
+                System.out.println("Error creating streams!");
                 return;
             }
 
