@@ -34,19 +34,19 @@ public class LanguageServer implements Runnable {
 
         while (true) {
 
-            Socket clientSocket = null;
+            Socket mainServerSocket = null;
             try {
-                clientSocket = serverSocket.accept();
+                mainServerSocket = serverSocket.accept();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            System.out.println("[lang]: New client connected");
+            System.out.println("[lang]: Main server connected");
 
             ObjectInputStream in;
             ObjectOutputStream out;
             try {
-                in = new ObjectInputStream(clientSocket.getInputStream());
-                out = new ObjectOutputStream(clientSocket.getOutputStream());
+                in = new ObjectInputStream(mainServerSocket.getInputStream());
+                out = new ObjectOutputStream(mainServerSocket.getOutputStream());
             } catch (IOException e) {
                 System.out.println("Error creating streams!");
                 return;

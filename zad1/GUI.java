@@ -21,7 +21,7 @@ public class GUI {
         translateButton.addActionListener(e -> {
             String wordToTranslate = wordField.getText();
             String targetLanguageCode = languageCodeField.getText();
-            String translation = new Client(8080).translate(wordToTranslate, targetLanguageCode);
+            String translation = new Client(8070).translate(wordToTranslate, targetLanguageCode);
             JOptionPane.showMessageDialog(frame, translation);
 
         });

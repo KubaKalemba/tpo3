@@ -7,14 +7,14 @@ import java.net.Socket;
 
 public class Client {
 
-    private final int serverPort;
+    private final int port;
 
-    public Client(int serverPort) {
-        this.serverPort = serverPort;
+    public Client(int port) {
+        this.port = port;
     }
 
     public String translate(String wordToTranslate, String targetLanguageCode) {
-        try (Socket socket = new Socket("localhost", serverPort);
+        try (Socket socket = new Socket("localhost", port);
              ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
              ObjectInputStream in = new ObjectInputStream(socket.getInputStream())) {
 
